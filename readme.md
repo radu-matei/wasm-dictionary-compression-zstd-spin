@@ -94,7 +94,6 @@ Another implementation built using Zstd failed in similar ways, but without the 
 A similar consumer component written in Rust appears to work:
 
 ```
-
 ❯ curl localhost:3000/rustapi/stream/big.txt -H "Available-Dictionary: abc" --output compressed.br
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
