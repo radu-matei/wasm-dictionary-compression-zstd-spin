@@ -1,0 +1,18 @@
+[package]
+name = "cmprsn-lib"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+brotli = { version = "7.0.0" }
+wit-bindgen-rt = { version = "0.38.0", features = ["bitflags"] }
+zstd = "0.13.2"
+
+[lib]
+crate-type = ["cdylib"]
+
+
+[package.metadata.component]
+package = "component:compressor"
+
+[package.metadata.component.dependencies]
