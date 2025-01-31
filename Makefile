@@ -1,6 +1,14 @@
 WASI_SDK_PATH := /opt/wasi-sdk/wasi-sdk-21.0
 CC := $(WASI_SDK_PATH)/bin/clang --sysroot=$(WASI_SDK_PATH)/share/wasi-sysroot
 
+
+build: compressor test spin
+test: 
+
+.PHONY: spin
+spin:
+	spin build
+
 .PHONY: compressor
 compressor:
 	cd compressor && \

@@ -13,7 +13,7 @@ router
         let headers = new Headers(res.headers);
 
         // This currently sets this as a global dictionary for every asset.
-        // This should be configurable per dictionary.
+        // It should be configurable per dictionary.
         headers.set("Use-As-Dictionary", `id=${dict}, match="/*", match-dest=("document" "frame")`);
         return new Response(res.body, { status: res.status, statusText: res.statusText, headers: headers });
     })
@@ -32,7 +32,8 @@ router
             console.log(`[compression]: Requested compression for file ${file} with dictionary ${id}`);
 
             // Instantiate the compressor and create a new transform stream.
-            let compressor = new Compressor(10, id);
+            // Setting the default compression level here as 0.
+            let compressor = new Compressor(0, id);
             let compressionStream = new TransformStream({
                 transform(chunk, controller) {
                     // for each chunk, compress thy bytes, then stream them
@@ -60,4 +61,3 @@ addEventListener('fetch', async (event: FetchEvent) => {
         console.error(`Error: ${e}`);
     }
 });
-
