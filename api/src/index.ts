@@ -1,5 +1,5 @@
 import { AutoRouter } from 'itty-router';
-import ZstdCompressor from './compression';
+import Compressor from './compression';
 
 let router = AutoRouter();
 
@@ -32,7 +32,7 @@ router
         let id = req.headers.get("Dictionary-Id");
         if (req.headers.get("Available-Dictionary") && id) {
             console.log(`Requested compression with dictionary ${id}`);
-            let compressor = new ZstdCompressor(10, id);
+            let compressor = new Compressor(10, id);
             let chunks = 0;
             let compressionStream = new TransformStream({
                 transform(chunk, controller) {
