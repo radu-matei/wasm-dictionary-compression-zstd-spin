@@ -1,0 +1,12 @@
+package component:compressor;
+
+interface compress {
+  use wasi:io/streams@0.2.0.{input-stream, output-stream};
+
+  resource compressor {
+constructor(level: u8, dict: string);
+    add-bytes: func(input: list<u8>) -> list<u8>;
+    finish: func() -> list<u8>;
+    pipe-through: func(input: borrow<input-stream>, output: borrow<output-stream>);
+  }
+}

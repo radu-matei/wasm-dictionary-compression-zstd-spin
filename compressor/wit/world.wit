@@ -1,10 +1,12 @@
 package component:compressor;
+use wasi:io/streams@0.2.0;
 
 world cmprsn {
     export compress;
 }
 
 interface compress {
+  use streams.{input-stream, output-stream};
   resource compressor {
     /// The constructor for the compressor resource takes the compression level
     /// and the path to load the dictionary from disk.
@@ -17,6 +19,8 @@ interface compress {
     /// Finish compression and return the final block of compressed bytes.
     /// After calling this, you cannot call `add_bytes` again.
     finish: func() -> list<u8>;
+
+    pipe-through: func(input: borrow<input-stream>, output: borrow<output-stream>);
   }
 }
 

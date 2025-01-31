@@ -7,6 +7,7 @@ edition = "2021"
 brotli = { version = "7.0.0", features = ["simd"], default-features = true }
 wit-bindgen-rt = { version = "0.38.0", features = ["bitflags"] }
 zstd = "0.13.2"
+anyhow = "1.0.95"
 
 [lib]
 crate-type = ["cdylib"]
@@ -15,4 +16,5 @@ crate-type = ["cdylib"]
 [package.metadata.component]
 package = "component:compressor"
 
-[package.metadata.component.dependencies]
+[package.metadata.component.target.dependencies]
+"wasi:io" = { path = "wit/deps/wasi-io-0.2.0" }

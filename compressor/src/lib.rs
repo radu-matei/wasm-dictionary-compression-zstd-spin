@@ -7,12 +7,27 @@ use std::{
     cell::{Cell, RefCell},
     io::Write,
 };
+use anyhow::Result;
 
 use brotli::CompressorWriter;
+use crate::bindings::exports::component::compressor::compress::{InputStream, OutputStream};
 
 pub struct BrotliCompressor {
     writer: RefCell<Option<CompressorWriter<Vec<u8>>>>,
     offset: Cell<usize>,
+}
+
+impl BrotliCompressor {
+    pub(crate) fn compress_stream(&self, input: &InputStream, output: &OutputStream) -> Result<()> {
+        while let Some(chunk) = input.blocking_read(8192).ok() {
+            let buf = self.add_bytes(chunk);
+            output.blocking_write_and_flush(&buf)?;
+        }
+
+        let buf = self.finish();
+        output.blocking_write_and_flush(&buf)?;
+        Ok(())
+    }
 }
 
 impl GuestCompressor for BrotliCompressor {
@@ -57,6 +72,10 @@ impl GuestCompressor for BrotliCompressor {
         let compressed = writer.into_inner();
         let offset = self.offset.get();
         compressed[offset..].to_vec()
+    }
+
+    fn pipe_through(&self, input: &InputStream, output: &OutputStream) {
+        self.compress_stream(input, output).unwrap();
     }
 }
 
@@ -120,6 +139,10 @@ impl GuestCompressor for ZstdCompressor {
             .take()
             .expect("Compressor was already finished or uninitialized");
         enc.finish().expect("zstd finish failed")
+    }
+
+    fn pipe_through(&self, _input: &InputStream, _output: &OutputStream) {
+        todo!()
     }
 }
 
