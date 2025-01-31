@@ -86,3 +86,55 @@ impl GuestCompressor for ZstdCompressor {
 impl Guest for ZstdCompressor {
     type Compressor = ZstdCompressor;
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::bindings::exports::component::compressor::compress::GuestCompressor;
+    use crate::zstd_compressor::ZstdCompressor;
+    use std::fs::File;
+    use std::io::Read;
+    use zstd::Decoder;
+
+    #[test]
+    fn test_compress_and_finish() {
+        let compressor = ZstdCompressor::new(0, "testdata/v1.dict".to_string());
+        let data = b"Hello, world!".to_vec();
+
+        let compressed_part = compressor.add_bytes(data.clone());
+        assert!(
+            !compressed_part.is_empty(),
+            "Compressed part should not be empty"
+        );
+
+        let final_block = compressor.finish();
+        assert!(!final_block.is_empty(), "Final block should not be empty");
+
+        let combined = [compressed_part, final_block].concat();
+        let mut dict_file = File::open("/testdata/v1.dict").unwrap();
+        let mut dict = Vec::new();
+        dict_file.read_to_end(&mut dict).unwrap();
+        let mut decoder = Decoder::with_dictionary(combined.as_slice(), &dict).unwrap();
+        let mut decompressed = vec![];
+        decoder.read_to_end(&mut decompressed).unwrap();
+
+        assert_eq!(
+            data, decompressed,
+            "Decompressed data should match original"
+        );
+    }
+
+    #[test]
+    fn test_multiple_add_bytes_calls() {
+        let compressor = ZstdCompressor::new(0, "testdata/v1.dict".to_string());
+        let chunk1 = compressor.add_bytes(b"Hello ".to_vec());
+        let chunk2 = compressor.add_bytes(b"Rust ".to_vec());
+        let chunk3 = compressor.add_bytes(b"World!".to_vec());
+        assert!(!chunk1.is_empty() && !chunk2.is_empty() && !chunk3.is_empty());
+
+        let final_block = compressor.finish();
+        assert!(
+            !final_block.is_empty(),
+            "Final block should not be empty after finish"
+        );
+    }
+}
