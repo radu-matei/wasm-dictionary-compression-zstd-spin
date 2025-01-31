@@ -2,8 +2,7 @@
   "version": 1,
   "packages": {
     "@fermyon/wasi-ext": {
-      "witPath": "../../wit",
-      "world": "js-wasi-ext"
+      "witPath": "../../wit"
     }
   }
 }
