@@ -3,78 +3,52 @@ import Compressor from './compression';
 
 let router = AutoRouter();
 
-
 router
     // Route handler for clients requesting dictionaries.
-    // Not using the default file server here because we need the additional header 'Use-As-Dictionary'.
+    // Not using the default file server here because we need the additional header 'Use-As-Dictionary' if we expect
+    // this to be used by browsers.
     .get("/dictionaries/:dict", async (req) => {
         let { dict } = req.params;
-        let res = await fetch(`/static/assets/${dict}`);
+        let res = await fetch(`/static/assets/dictionaries/${dict}`);
         let headers = new Headers(res.headers);
 
         // This currently sets this as a global dictionary for every asset.
         // This should be configurable per dictionary.
         headers.set("Use-As-Dictionary", `id=${dict}, match="/*", match-dest=("document" "frame")`);
-
         return new Response(res.body, { status: res.status, statusText: res.statusText, headers: headers });
     })
 
+    // Stream a file and if the right headers are present, compress it using the desired dictionary.
     .get("/stream/:file", async (req) => {
-        // const res = await fetch("https://raw.githubusercontent.com/dscape/spell/refs/heads/master/test/resources/big.txt");
         let { file } = req.params;
-        console.log(`file: ${file}`)
-        const res = await fetch(`/static/assets/${file}`);
-
-        const { status, body } = res;
+        const res = await fetch(`/static/assets/train/${file}`);
 
         // If the request headers contained a dictionary ID, compress the outgoing stream.
         // Otherwise, stream the response unaltered.
+        // This currently only supports Dictionary Compressed Zstandard streams.
+        let acceptEncoding = req.headers.get("Accept-Encoding") || "";
         let id = req.headers.get("Dictionary-Id");
-        if (req.headers.get("Available-Dictionary") && id) {
-            console.log(`Requested compression with dictionary ${id}`);
+        if (req.headers.get("Available-Dictionary") && id && acceptEncoding.includes("dcz")) {
+            console.log(`[compression]: Requested compression for file ${file} with dictionary ${id}`);
+
+            // Instantiate the compressor and create a new transform stream.
             let compressor = new Compressor(10, id);
-            let chunks = 0;
             let compressionStream = new TransformStream({
                 transform(chunk, controller) {
+                    // for each chunk, compress thy bytes, then stream them
                     let buf = compressor.addBytes(chunk);
-                    console.log(`Chunk #${chunks}: initial chunk size ${chunk.length}; compressed size ${buf.length}`);
                     controller.enqueue(buf);
-                    chunks++;
                 }, flush(controller) {
                     let final = compressor.finish();
-                    console.log(`Final size: ${final.length}`);
-                    console.log(`Number of chunks: ${chunks}`);
                     controller.enqueue(final);
                 }
             });
 
-            let compressedBody = body!.pipeThrough(compressionStream);
-            // let newHeaders = new Headers(res.headers);
-            // newHeaders.delete("Content-Length");
-            // newHeaders.set("Content-Encoding", "zstd");
-
-            return new Response(compressedBody, { status });
-
+            return new Response(res.body?.pipeThrough(compressionStream), { status: res.status });
+            // The request did not have the right headers, so passing the stream along unaltered.
         } else {
-
-            let chunks = 0;
-            // Create a TransformStream to log chunks and pass them along
-            // This is not really needed to just stream the body, but helpful debugging why the above is failing.
-            const transformStream = new TransformStream({
-                transform(chunk, controller) {
-                    chunks++;
-                    console.log(`Chunk #${chunks}: initial chunk size ${chunk.length}`);
-                    controller.enqueue(chunk); // Pass the chunk along
-                }, flush(_controller) {
-                    console.log(`Number of chunks: ${chunks}`);
-                }
-            });
-
-            const transformedBody = body!.pipeThrough(transformStream);
-
-            console.log("Returning the response body unmodified");
-            return new Response(transformedBody, { status });
-            // return new Response(body, { status, headers })
+            console.log(`[compression]: Streaming file ${file} unaltered`);
+            return new Response(res.body, { status: res.status });
         }
     })
 

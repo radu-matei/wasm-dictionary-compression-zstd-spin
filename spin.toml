@@ -4,45 +4,37 @@ spin_manifest_version = 2
 name = "cmprsn"
 version = "0.1.0"
 
+# Static fileserver for our assets directory.
+# This could be replaced by the TypeScript component itself reading files.
 [[trigger.http]]
 route = "/static/assets/..."
 component = "assets"
-
 [component.assets]
 source = { url = "https://github.com/fermyon/spin-fileserver/releases/download/v0.3.0/spin_static_fs.wasm", digest = "sha256:ef88708817e107bf49985c7cefe4dd1f199bf26f6727819183d5c996baa3d148" }
 files = [{ source = "assets", destination = "/" }]
 
+# The main function that performs compression.
+# It handles all routes that are not intended for the static fileserver.
 [[trigger.http]]
 route = "/..."
 component = "api"
 
 [component.api]
+# The compiled Wasm component to for our function.
+source = "api/dist/api.wasm"
+# This function can make outbound requests to any host.
+allowed_outbound_hosts = ["*://*:*"]
+files = [{ source = "assets/dictionaries", destination = "/" }]
 # Enable dependencies to inherit the permissions of the API component.
 # This gives the compressor access to the dictionaries directory.
 dependencies_inherit_configuration = true
-files = [{ source = "dictionaries", destination = "/" }]
-source = "api/dist/api.wasm"
-allowed_outbound_hosts = ["*://*:*"]
 
+# Build configuration for our component.
 [component.api.build]
 command = "npm install && npm run build"
 workdir = "api"
 watch = ["src/**/*.ts"]
 
+# Library written in Rust that performs zstd dictionary compression.
 [component.api.dependencies]
-"component:compressor/compress" = { path = "compressor/target/wasm32-wasip1/release/cmprsn_lib.wasm" }
-
-[[trigger.http]]
-route = "/rustapi/..."
-component = "rustapi"
-
-[component.rustapi]
-source = "rustapi/target/wasm32-wasip1/release/rustapi.wasm"
-allowed_outbound_hosts = ["*://*:*"]
-[component.rustapi.build]
-command = "cargo build --target wasm32-wasip1 --release"
-workdir = "rustapi"
-watch = ["src/**/*.rs", "Cargo.toml"]
-
-[component.rustapi.dependencies]
 "component:compressor/compress" = { path = "compressor/target/wasm32-wasip1/release/cmprsn_lib.wasm" }

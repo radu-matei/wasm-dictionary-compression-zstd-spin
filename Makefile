@@ -1,9 +1,15 @@
+WASI_SDK_PATH := /opt/wasi-sdk/wasi-sdk-21.0
+CC := $(WASI_SDK_PATH)/bin/clang --sysroot=$(WASI_SDK_PATH)/share/wasi-sysroot
 
 .PHONY: compressor
 compressor:
-	cd compressor && RUSTFLAGS=-Ctarget-feature=+simd128 cargo +nightly component build --release
+	cd compressor && \
+		WASI_SDK_PATH="$(WASI_SDK_PATH)" \
+		CC="$(CC)" \
+		RUSTFLAGS=-Ctarget-feature=+simd128 \
+		cargo +nightly component build --release
 
 .PHONY: dictionaries
 dictionaries:
-	zstd --train assets/* -o dictionaries/v1.dict --maxdict=65536	
+	zstd --train assets/train/* -o assets/dictionaries/v1.dict --maxdict=65536	
 
