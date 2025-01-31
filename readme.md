@@ -15,8 +15,7 @@ TypeScript API.
 ### Building and running
 
 ```
-$ make compressor
-$ spin build
+$ make
 $ spin up
 Logging component stdio to ".spin/logs/"
 
