@@ -31,3 +31,18 @@ watch = ["src/**/*.ts"]
 
 [component.api.dependencies]
 "component:compressor/compress" = { path = "compressor/target/wasm32-wasip1/release/cmprsn_lib.wasm" }
+
+[[trigger.http]]
+route = "/rustapi/..."
+component = "rustapi"
+
+[component.rustapi]
+source = "rustapi/target/wasm32-wasip1/release/rustapi.wasm"
+allowed_outbound_hosts = ["*://*:*"]
+[component.rustapi.build]
+command = "cargo build --target wasm32-wasip1 --release"
+workdir = "rustapi"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+[component.rustapi.dependencies]
+"component:compressor/compress" = { path = "compressor/target/wasm32-wasip1/release/cmprsn_lib.wasm" }

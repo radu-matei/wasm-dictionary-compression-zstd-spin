@@ -1,7 +1,7 @@
 
 .PHONY: compressor
 compressor:
-	cd compressor && RUSTFLAGS=-Ctarget-feature=+simd128 cargo component build --release
+	cd compressor && RUSTFLAGS=-Ctarget-feature=+simd128 cargo +nightly component build --release
 
 .PHONY: dictionaries
 dictionaries:

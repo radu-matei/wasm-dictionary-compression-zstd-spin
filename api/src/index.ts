@@ -59,17 +59,17 @@ router
 
             let chunks = 0;
             // Create a TransformStream to log chunks and pass them along
+            // This is not really needed to just stream the body, but helpful debugging why the above is failing.
             const transformStream = new TransformStream({
                 transform(chunk, controller) {
                     chunks++;
                     console.log(`Chunk #${chunks}: initial chunk size ${chunk.length}`);
                     controller.enqueue(chunk); // Pass the chunk along
-                }, flush(controller) {
+                }, flush(_controller) {
                     console.log(`Number of chunks: ${chunks}`);
                 }
             });
 
-            // Use pipeThrough to process the body through the TransformStream
             const transformedBody = body!.pipeThrough(transformStream);
 
             console.log("Returning the response body unmodified");

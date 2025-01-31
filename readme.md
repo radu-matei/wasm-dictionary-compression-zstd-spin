@@ -86,3 +86,25 @@ Caused by:
 ```
 
 Another implementation built using Zstd failed in similar ways, but without the hyper error. So not sure it's actually a networking error. 
+
+
+
+# Update
+
+A similar consumer component written in Rust appears to work:
+
+```
+
+❯ curl localhost:3000/rustapi/stream/big.txt -H "Available-Dictionary: abc" --output compressed.br
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 1890k    0 1890k    0     0   303k      0 --:--:--  0:00:06 --:--:--  293k
+
+❯ brotli -d compressed.br -o big.txt
+
+❯ sha256sum big.txt
+fa066c7d40f0f201ac4144e652aa62430e58a6b3805ec70650f678da5804e87b  big.txt
+
+❯ sha256sum assets/big.txt
+fa066c7d40f0f201ac4144e652aa62430e58a6b3805ec70650f678da5804e87b  assets/big.txt
+```

@@ -10,12 +10,12 @@ use std::{
 
 use brotli::CompressorWriter;
 
-pub struct MyCompressor {
+pub struct BrotliCompressor {
     writer: RefCell<Option<CompressorWriter<Vec<u8>>>>,
     offset: Cell<usize>,
 }
 
-impl GuestCompressor for MyCompressor {
+impl GuestCompressor for BrotliCompressor {
     fn new(level: u8, _dict_path: String) -> Self {
         let quality = level.min(11) as u32;
         let lgwin = 22u32;
@@ -60,8 +60,74 @@ impl GuestCompressor for MyCompressor {
     }
 }
 
-impl Guest for MyCompressor {
-    type Compressor = MyCompressor;
+pub struct ZstdCompressor {
+    encoder: RefCell<Option<zstd::Encoder<'static, Vec<u8>>>>,
+    offset: Cell<usize>,
 }
 
-bindings::export!(MyCompressor with_types_in bindings);
+impl GuestCompressor for ZstdCompressor {
+    /// The constructor for the compressor resource takes the compression level
+    /// and the path to load the dictionary from disk.
+    fn new(level: u8, _dict_path: String) -> Self {
+        // let dict_data = if dict_path.is_empty() {
+        //     Vec::new()
+        // } else {
+        //     let mut file = File::open(&dict_path)
+        //         .unwrap_or_else(|e| panic!("Cannot open dict '{}': {}", dict_path, e));
+        //     let mut buf = Vec::new();
+        //     file.read_to_end(&mut buf)
+        //         .expect("Could not read dict file");
+        //     buf
+        // };
+
+        // let encoder = if dict_data.is_empty() {
+        //     // No dictionary
+        let encoder =
+            zstd::Encoder::new(Vec::new(), level as i32).expect("Failed to create zstd encoder");
+        // } else {
+        // zstd::Encoder::with_dictionary(Vec::new(), level as i32, &dict_data)
+        //     .expect("Failed to create zstd encoder with dictionary")
+        // };
+
+        ZstdCompressor {
+            encoder: RefCell::new(Some(encoder)),
+            offset: Cell::new(0),
+        }
+    }
+
+    /// Receive bytes, write them into the zstd encoder, flush, and
+    /// return newly produced compressed bytes (since last call).
+    fn add_bytes(&self, input: Vec<u8>) -> Vec<u8> {
+        let mut enc_guard = self.encoder.borrow_mut();
+        let enc = enc_guard
+            .as_mut()
+            .expect("Compressor was already finished or uninitialized");
+
+        enc.write_all(&input).expect("zstd write failed");
+        enc.flush().expect("zstd flush failed");
+
+        let buffer = enc.get_ref();
+        let offset = self.offset.get();
+        let new_chunk = buffer[offset..].to_vec();
+        self.offset.set(buffer.len());
+
+        new_chunk
+    }
+
+    fn finish(&self) -> Vec<u8> {
+        let mut enc_guard = self.encoder.borrow_mut();
+        let enc = enc_guard
+            .take()
+            .expect("Compressor was already finished or uninitialized");
+        enc.finish().expect("zstd finish failed")
+    }
+}
+
+impl Guest for BrotliCompressor {
+    type Compressor = BrotliCompressor;
+}
+
+impl Guest for ZstdCompressor {
+    type Compressor = ZstdCompressor;
+}
+bindings::export!(BrotliCompressor with_types_in bindings);

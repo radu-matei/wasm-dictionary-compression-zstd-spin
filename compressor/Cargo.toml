@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-brotli = { version = "7.0.0" }
+brotli = { version = "7.0.0", features = ["simd"], default-features = true }
 wit-bindgen-rt = { version = "0.38.0", features = ["bitflags"] }
 zstd = "0.13.2"
 
