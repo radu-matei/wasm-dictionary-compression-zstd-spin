@@ -1,4 +1,4 @@
-WASI_SDK_PATH := /opt/wasi-sdk/wasi-sdk-21.0
+WASI_SDK_PATH := /opt/wasi-sdk
 CC := $(WASI_SDK_PATH)/bin/clang --sysroot=$(WASI_SDK_PATH)/share/wasi-sysroot
 
 
@@ -16,8 +16,6 @@ compressor:
 		CC="$(CC)" \
 		RUSTFLAGS=-Ctarget-feature=+simd128 \
 		cargo +nightly component build --release
-
-
 
 .PHONY: test
 test:

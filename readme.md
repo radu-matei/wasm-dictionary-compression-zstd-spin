@@ -14,7 +14,15 @@ TypeScript API.
 
 ### Building and running
 
+Prerequisites:
+
+* [Make](https://www.gnu.org/software/make/) — used for executing the make target
+* [WASI SDK](https://github.com/WebAssembly/wasi-sdk), [Rust](https://www.rust-lang.org/tools/install), and [`cargo component`](https://github.com/bytecodealliance/cargo-component)  — used for compiling the Wasm component used for compression
+* [Node.js](https://nodejs.org/en) and [NPM](https://www.npmjs.com/) — used for building the TypeScript API into a Wasm component
+* [Spin](https://github.com/fermyon/spin) — used for running the overall function
+
 ```
+# set the WASI_SDK variable to your installation directory
 $ make
 $ spin up
 Logging component stdio to ".spin/logs/"
@@ -56,5 +64,4 @@ $ sha256sum assets/train/small.txt uncompressed.txt
 ```
 
 The compression behavior is controlled by the headers according to the [IETF draft for dictionary compression](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-compression-dictionary-19).
-
 
