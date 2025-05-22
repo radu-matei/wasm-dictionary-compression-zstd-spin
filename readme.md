@@ -66,4 +66,4 @@ $ sha256sum assets/train/small.txt uncompressed.txt
 
 The compression behavior is controlled by the headers according to the [IETF draft for dictionary compression](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-compression-dictionary-19).
 
-> Note: this project relies on an [unreleased version of ComponentizeJS based on the bug fix](https://github.com/bytecodealliance/ComponentizeJS/pull/184). Once a new release is out, it will be updated.
+**Note**: In `api/package.json`, the `@spin-deps/component-compressor` needs to be placed after `@spinframework/*` dependencies due to a `wit` merging quirk defined in the [issue](https://github.com/bytecodealliance/wasm-tools/issues/1897). This is due to rust component minimizing the `wit`. 

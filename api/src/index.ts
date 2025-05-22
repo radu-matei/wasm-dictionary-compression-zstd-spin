@@ -1,5 +1,5 @@
 import { AutoRouter } from 'itty-router';
-import Compressor from './compression';
+import { compress } from "@spin-deps/component-compressor"
 
 let router = AutoRouter();
 
@@ -33,7 +33,7 @@ router
 
             // Instantiate the compressor and create a new transform stream.
             // Setting the default compression level here as 0.
-            let compressor = new Compressor(0, id);
+            let compressor = new compress.Compressor(0, id);
             let compressionStream = new TransformStream({
                 transform(chunk, controller) {
                     // for each chunk, compress thy bytes, then stream them
