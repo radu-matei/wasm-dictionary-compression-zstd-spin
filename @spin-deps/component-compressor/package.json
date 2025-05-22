@@ -1,0 +1,20 @@
+{
+    "name": "@spin-deps/component-compressor",
+    "version": "0.1.0",
+    "description": "Generated Package for @spin-deps/component-compressor",
+    "main": "index.js",
+    "scripts": {
+    },
+    "author": "",
+    "license": "ISC",
+    "config": {
+        "witDependencies": 
+        [
+            {
+            "witPath": "./wit",
+            "package": "root:component",
+            "world": "importized-component-compressor"
+            }
+        ]
+    }
+}

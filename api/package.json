@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "build": "knitwit --out-dir build/wit/knitwit --out-world combined && npx webpack --mode=production && npx mkdirp dist && npx j2w -i build/bundle.js -d build/wit/knitwit -n combined -o dist/api.wasm"
+        "build": "npx webpack && mkdirp dist && j2w -i build/bundle.js -o dist/api.wasm"
     },
     "devDependencies": {
         "@fermyon/knitwit": "0.3.0",
@@ -14,7 +14,9 @@
         "webpack-cli": "^4.10.0"
     },
     "dependencies": {
-        "@fermyon/spin-sdk": "git+https://github.com/karthik2804/spin-js-sdk.git#membuffer_fix",
+        "@spinframework/build-tools": "1.0.0",
+        "@spinframework/wasi-http-proxy": "1.0.0",
+        "@spin-deps/component-compressor": "file:../@spin-deps/component-compressor",
         "itty-router": "^5.0.18"
     }
 }
