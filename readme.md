@@ -66,4 +66,24 @@ $ sha256sum assets/train/small.txt uncompressed.txt
 
 The compression behavior is controlled by the headers according to the [IETF draft for dictionary compression](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-compression-dictionary-19).
 
+### Regenerating Bindings
+
+Install the latest `spin-deps` plugin:
+
+```console
+spin plugins install --url https://github.com/fermyon/spin-deps-plugin/releases/download/canary/spin-deps.json -y
+```
+
+Use `spin deps` to create a new `npm` package:
+
+```console
+spin deps add ./compressor/target/wasm32-wasip1/release/cmprsn_lib.wasm 
+```
+
+install the package:
+
+```console
+npm install ./@spin-deps/component-compressor
+```
+
 **Note**: In `api/package.json`, the `@spin-deps/component-compressor` needs to be placed after `@spinframework/*` dependencies due to a `wit` merging quirk defined in the [issue](https://github.com/bytecodealliance/wasm-tools/issues/1897). This is due to rust component minimizing the `wit`. 
