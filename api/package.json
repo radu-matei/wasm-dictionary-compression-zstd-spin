@@ -14,7 +14,7 @@
         "webpack-cli": "^4.10.0"
     },
     "dependencies": {
-        "@spinframework/build-tools": "1.0.0",
+        "@spinframework/build-tools": "1.0.7",
         "@spinframework/wasi-http-proxy": "1.0.0",
         "@spin-deps/component-compressor": "file:../@spin-deps/component-compressor",
         "itty-router": "^5.0.18"
